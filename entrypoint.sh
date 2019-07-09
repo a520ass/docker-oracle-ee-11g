@@ -45,7 +45,7 @@ case "$1" in
 			echo "found files in /u01/app/oracle/oradata Using them instead of initial database"
 			echo "EE:$ORACLE_HOME:N" >> /etc/oratab
 			chown oracle:dba /etc/oratab
-			chown 664 /etc/oratab
+			chmod 664 /etc/oratab
 			rm -rf /u01/app/oracle-product/11.2.0/EE/dbs
 			ln -s /u01/app/oracle/dbs /u01/app/oracle-product/11.2.0/EE/dbs
 			#Startup Database
@@ -68,14 +68,14 @@ case "$1" in
 			su oracle -c "/u01/app/oracle/product/11.2.0/EE/bin/tnslsnr &"
 			#create DB for SID: EE
 			echo "Running initialization by dbca"
-			su oracle -c "$ORACLE_HOME/bin/dbca -silent -createDatabase -templateName General_Purpose.dbc -gdbname EE.oracle.docker -sid EE -responseFile NO_VALUE -characterSet $CHARACTER_SET -totalMemory $DBCA_TOTAL_MEMORY -emConfiguration LOCAL -dbsnmpPassword oracle -sysPassword oracle -systemPassword oracle"
+			su oracle -c "$ORACLE_HOME/bin/dbca -silent -createDatabase -templateName General_Purpose.dbc -gdbname EE.oracle.docker -sid EE -responseFile NO_VALUE -characterSet $CHARACTER_SET -totalMemory $DBCA_TOTAL_MEMORY -emConfiguration LOCAL -dbsnmpPassword oracle -sysPassword oracle -systemPassword oracle -sysmanPassword oracle"
 			
-			# echo "Configuring Apex console"
-			# cd $ORACLE_HOME/apex
-			# su oracle -c 'echo -e "0Racle$\n8080" | $ORACLE_HOME/bin/sqlplus -S / as sysdba @apxconf > /dev/null'
-			# su oracle -c 'echo -e "${ORACLE_HOME}\n\n" | $ORACLE_HOME/bin/sqlplus -S / as sysdba @apex_epg_config_core.sql > /dev/null'
-			# su oracle -c 'echo -e "ALTER USER ANONYMOUS ACCOUNT UNLOCK;" | $ORACLE_HOME/bin/sqlplus -S / as sysdba > /dev/null'
-			# echo "Database initialized. Please visit http://#containeer:8080/em http://#containeer:8080/apex for extra configuration if needed"
+			echo "Configuring Apex console"
+			cd $ORACLE_HOME/apex
+			su oracle -c 'echo -e "0Racle$\n8080" | $ORACLE_HOME/bin/sqlplus -S / as sysdba @apxconf > /dev/null'
+			su oracle -c 'echo -e "${ORACLE_HOME}\n\n" | $ORACLE_HOME/bin/sqlplus -S / as sysdba @apex_epg_config_core.sql > /dev/null'
+			su oracle -c 'echo -e "ALTER USER ANONYMOUS ACCOUNT UNLOCK;" | $ORACLE_HOME/bin/sqlplus -S / as sysdba > /dev/null'
+			echo "Database initialized. Please visit http://#containeer:8080/em http://#containeer:8080/apex for extra configuration if needed"
 		fi
 
 		if [ $WEB_CONSOLE == "true" ]; then
